@@ -1,7 +1,24 @@
-var app = angular.module('wineApp', [])
+var app = angular.module('wineApp', ['ngRoute'])
     .controller('WinesIndexController',WinesIndexController)
     .controller('WinesShowController',WinesShowController);
-
+// brings in $routeProvider and directs at /
+app.config(function($routeProvider,$locationProvider){
+    $routeProvider
+    .when('/',{
+        // template:"Hello!"
+        templateUrl:"/templates/wines-index.html",
+        controller:'WinesIndexController'
+    })
+    .when('/wines/:id',{
+        templateUrl: '/templates/wines-show.html',
+        controller: 'WinesShowController'
+    });
+    $locationProvider
+    .html5Mode({
+        enabled:true,
+        requireBase:false
+    });
+});
 console.log('Angular is working.');
 
 ////////////
@@ -13,15 +30,28 @@ console.log('Angular is working.');
 // CONTROLLERS //
 /////////////////
 
-WinesIndexController.$inject = ['$scope'];
-function WinesIndexController($scope){
+WinesIndexController.$inject = ['$scope', 'WineFactory','$http'];
+function WinesIndexController($scope,WineFactory,$http){
   console.log("Wine Index");
+  $scope.hello = "wine index controller is working! Can you taste my power!!!";
+  // $scope.wineList = WineFactory.query();
+  $http.get("http://daretoexplore.herokuapp.com/wines/")
+  .then(function(response){
+  $scope.wineList = response.data;
+});
 }
 
-WinesShowController.$inject = ['$scope'];
-function WinesShowController($scope){
-  console.log("Wine Show");
+
+WinesShowController.$inject = ['$scope','WineFactory','$routeParams','$http'];
+function WinesShowController($scope,WineFactory,$routeParams,$http){
+  console.log($routeParams.id);
+  // $scope.thisWine = WineFactory.get($routeParams.id);
+  $http.get("http://daretoexplore.herokuapp.com/wines/"+$routeParams.id)
+  .then(function(response){
+  $scope.thisWine = response.data;
+});
 }
+
 
 ////////////
 // MODELS //
